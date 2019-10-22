@@ -10,6 +10,7 @@ public interface ISymbolTable {
   public static final String BOOL_OBJECT = "Boolean";
   public static final String STRING_OBJECT = "String";
   public static final String OBJECT = "Object";
+  public static final String NO_TYPE = "";
 
   public String getNumberLiteralType(String token);
   
