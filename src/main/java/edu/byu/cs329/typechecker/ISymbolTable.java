@@ -13,6 +13,8 @@ public interface ISymbolTable {
   public static final String STRING_OBJECT = "String";
   public static final String OBJECT = "Object";
 
+  public String getNumberLiteralType(String token);
+  
   public String getFieldType(String className, String fieldName);
 
   public String getMethodReturnType(String className, String methodName);
