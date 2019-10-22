@@ -1,7 +1,5 @@
 package edu.byu.cs329.typechecker;
 
-import java.util.Deque;
-
 public interface ISymbolTable {
 
   public static final String SHORT = "short";
