@@ -1,5 +1,7 @@
 package edu.byu.cs329.typechecker;
 
+import java.util.List;
+
 public interface ISymbolTable {
 
   public static final String SHORT = "short";
@@ -34,5 +36,7 @@ public interface ISymbolTable {
   
   public boolean localExists(String name);
   
-  public ISymbolTable addLocal(String name, String type);
+  public boolean addLocal(String name, String type);
+  
+  public void removeLocals(List<String> locals);
 }
