@@ -22,6 +22,13 @@ The input programs to type check are restricted a subset of Java defined as foll
   * No shift operators: `<<`, `>>`, and `>>>`
   * No binary operators: `^`, `&`, and `|`
   * No `switch`-statements
+  * No `for`-statements
+  * No arrays
+  * No type casting
+  * No exceptions
+  * No conditional expressions
+  * No type literals
+  * No variable declaration lists (e.g. `int a,b,c`)
   * Only the following classes from `java.lang` are recognized
 
     * Boolean
@@ -84,10 +91,12 @@ Implement the dynamic test generation for the static type proof for the followin
 
   * `CompilationUnit` (top level file)
   * `TypeDeclaration` (classes)
-  * `Method`
+  * `MethodDeclaration`
   * `Block` (scopes)
   * `EmptyStatement`
-  * `VariableDeclarationFragment` with initializers (fields and local variables)
+  * `FieldAccess` (including `ThisExpression`)
+  * `VariableDeclarationFragment` with initializers for fields and local variables
+  * `Assignment`
   *  `NumberLiterals`, `StringLiterals`, and `BooleanLiterals`
 
 ## Test Code
@@ -143,10 +152,18 @@ Create a pull request when the lab is done. Submit to Canvas the URL of the repo
 
 | Item | Point Value |
 | ------- | ----------- |
-| Test framework for symbol table implementation | 30 |
+| Test framework for symbol table implementation | 20 |
 | Symbol table implementation | 30 |
-| Tests to tests proof structure | 30 |
-| Tests to show outcome of proofs | 30 |
-| Integration tests (different from unit tests) | 20 |
-| Type proof visitor implementation | 30 | 
+| Tests to tests proof structure | 20 |
+| Tests to show outcome of proofs | 20 |
+| Integration tests (different from unit tests) | 10 |
+| `CompilationUnit` implementation | 5 |
+| `TypeDeclaration` implementation | 10 |
+| `MethodDeclaration` implementation | 10 |
+| `Block` (scopes) implementation | 10 |
+| `EmptyStatement` implementation | 5 |
+| `FieldAccess` implementation (including `ThisExpression`) | 10 |
+| `VariableDeclarationFragment` with initializers for fields and local variables implementation | 10 |
+| `Assignment` implementation | 5 | 
+| `NumberLiterals`, `StringLiterals`, and `BooleanLiterals` implementation | 5 | 
 | Style, documentation, naming conventions, test organization, readability, etc. | 30 | 
