@@ -20,6 +20,8 @@ public interface ISymbolTable {
 
   public String getMethodReturnType(String className, String methodName);
 
+  public List<String> getParameterNames(String className, String methodName);
+  
   public String getParameterType(String className, String methodName,
       String paramName);
 
