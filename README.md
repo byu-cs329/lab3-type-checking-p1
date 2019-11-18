@@ -94,10 +94,15 @@ Implement the dynamic test generation for the static type proof for the followin
   * `MethodDeclaration`
   * `Block` (scopes)
   * `EmptyStatement`
-  * `FieldAccess` (including `ThisExpression`)
+  * `FieldAccess` that is created with the  `ThisExpression` (captures the `this` keyword)
+  * `QualifideName` (used for all other field access such as `a.b.c.d`)
   * `VariableDeclarationFragment` with initializers for fields and local variables
   * `Assignment`
   *  `NumberLiterals`, `StringLiterals`, and `BooleanLiterals`
+
+Field access is a little tricky because `a` where `a` is a field is just a `SimpleName`. If you have `this.a`, then it becomes a `FieldAccess` expression. And finally, `n.a` where `n` is some object is a `QualifiedName`.
+
+Nesting therefore appears as a `QualifiedName` expression that nests the traversal of field accesses as in `a.b.c.d`. The nesting is in the `QualifiedName`. The first level `QualifiedName` has `d` as the name with `a.b.c` as a qualifier which is a `QualifiedName` expression. That next level `QualifiedName` has `c` as the name with `a.b` as a qualifier in the `QualifiedName`. This last `QualifiedName` bottoms out with `b` as the name a `a` as the qualifier which in this case is a `SimpleName` expression. The type proof must first bottom out to the first type (the `typeof(a)` in this case), and then build up the proof returning from recursion.
 
 ## Test Code
 
@@ -159,10 +164,11 @@ Create a pull request when the lab is done. Submit to Canvas the URL of the repo
 | Integration tests (different from unit tests) | 10 |
 | `CompilationUnit` implementation | 5 |
 | `TypeDeclaration` implementation | 10 |
-| `MethodDeclaration` implementation | 10 |
+| `MethodDeclaration` implementation | 5 |
 | `Block` (scopes) implementation | 10 |
 | `EmptyStatement` implementation | 5 |
-| `FieldAccess` implementation (including `ThisExpression`) | 10 |
+| `FieldAccess` implementation (including `ThisExpression`) | 5 |
+| `QualifiedName` implementation | 10 |
 | `VariableDeclarationFragment` with initializers for fields and local variables implementation | 10 |
 | `Assignment` implementation | 5 | 
 | `NumberLiterals`, `StringLiterals`, and `BooleanLiterals` implementation | 5 | 
