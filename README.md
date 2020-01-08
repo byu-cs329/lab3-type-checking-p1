@@ -12,34 +12,7 @@ Review carefully the [type checking](https://bitbucket.org/byucs329/byu-cs-329-l
 
 # Java Subset
 
-The input programs to type check are restricted a subset of Java defined as follows:
-
-  * `short`, `int`, and `boolean` are the only primitive values
-  * No generics, lambda-expressions, or anonymous classes
-  * No interfaces or inheritance (you do not need to track a type hierarchy in this part of the lab)
-  * No reflection
-  * No imports
-  * No shift operators: `<<`, `>>`, and `>>>`
-  * No binary operators: `^`, `&`, and `|`
-  * No `switch`-statements
-  * No `for`-statements
-  * No arrays
-  * No type casting
-  * No exceptions
-  * No conditional expressions
-  * No type literals
-  * No variable declaration lists (e.g. `int a,b,c`)
-  * Only the following classes from `java.lang` are recognized
-
-    * Boolean
-    * Integer
-    * Object
-    * Short
-    * String
-
-  * No variable shadowing
-  
-See [https://github.com/byu-cs329/lab0-constant-folding](https://github.com/byu-cs329/lab0-constant-folding) for an example of a interesting program that falls  comfortably inside this subset.
+The static type checker should support a [subset of Java](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). If something seems unusually hard then be sure it is in the [language subset](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md).
 
 # Symbol Table Interface
 
