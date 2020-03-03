@@ -68,10 +68,10 @@ Implement the dynamic test generation for the static type proof for the followin
   * `Block` (scopes)
   * `EmptyStatement`
   * `FieldAccess` that is created with the  `ThisExpression` (captures the `this` keyword)
-  * `QualifideName` (used for all other field access such as `a.b.c.d`)
+  * `QualifiedName` (used for all other field access such as `a.b.c.d`)
   * `VariableDeclarationFragment` with initializers for fields and local variables
   * `Assignment`
-  *  `NumberLiterals`, `StringLiterals`, and `BooleanLiterals`
+  * `NumberLiterals`, `StringLiterals`, and `BooleanLiterals`
 
 Field access is a little tricky because `a` where `a` is a field is just a `SimpleName`. If you have `this.a`, then it becomes a `FieldAccess` expression. And finally, `n.a` where `n` is some object is a `QualifiedName`.
 
