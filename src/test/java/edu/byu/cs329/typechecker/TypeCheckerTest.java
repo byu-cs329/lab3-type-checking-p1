@@ -29,8 +29,6 @@ public class TypeCheckerTest {
 
   private List<DynamicNode> generateProof(final String fileName, ISymbolTable symbolTable) {
     URI fileURI = getURI(fileName);
-    ASTNode cu = Parser.parse(fileURI);
-
     // TODO: instanciate visitor, call cu.accept(visitor), and return proof
     return null;
   }

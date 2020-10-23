@@ -4,7 +4,7 @@ The objective of this lab is to implement [static type checking](https://en.wiki
 
 As before, the implementation will use the [org.eclipse.jdt.core.dom](https://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fdom%2Fpackage-summary.html) to represent and manipulate Java.  The generated tests for the static type proof are generated with a specialized [ASTVisitor](https://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2Fdom%2Fpackage-summary.html). 
 
-The program will take no arguments as input and can only be invoked through the tests. The program should only apply to a limited subset of Java defined below. If an input file is outside the subset, then it should throw an appropriate run-time exception.
+The program will take no arguments as input and can only be invoked through the tests. The program should only apply to a limited subset of Java defined below. If an input file is outside the subset, then all bets are off.
 
 # Reading
 
@@ -12,7 +12,7 @@ Review carefully the [type checking](https://bitbucket.org/byucs329/byu-cs-329-l
 
 # Java Subset
 
-The static type checker should support a [subset of Java](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). If something seems unusually hard then be sure it is in the [language subset](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md).
+The static type checker should support a [subset of Java](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). If something seems unusually hard then be sure it is in the [language subset](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). 
 
 # Symbol Table Interface
 
@@ -38,7 +38,7 @@ The name of for the inner most class by convention is `F$G$H`: ```F$G$H x = new 
 className = this.className.stream().collect(Collectors.joining("$"));
 ```
 
-Something that makes lookup hard is that inner classes may reference fields in outer classes as in an instance of `F$G$H` using `F$G.y` in a method as `y = 10`. When looking up the type for `y`, the lookup needs to first check the local variables for `y`, then the fields of the current class `F$G$H` in this example, and then move up through the nested classes checking for the variable in those fields. As such, when it checks for `F$G.f` it will find the name and return the `int` type. 
+Something what makes lookup hard is that inner classes may reference fields in outer classes as in an instance of `F$G$H` using `F$G.y` in a method as `y = 10`. When looking up the type for `y`, the lookup needs to first check the local variables for `y`, then the fields of the current class `F$G$H` in this example, and then move up through the nested classes checking for the variable in those fields. As such, when it checks for `F$G.f` it will find the name and return the `int` type. 
 
 The lookup can use the class name stack as in the above and pop names off the stack in doing the look up though the classes (though it will need to first copy the stack to preserve it for later lookups). If the code actually uses the qualified name as in `F$G.y = 10`, then there will be a qualified name in the `ASTNode` along with the simple name `y` (stored in two separate areas). Use the simple name and created the full name from the stack to avoid having to special case; although, it may be that the fully qualified name is always populated as well and can be used. Do whatever is easiest and most clear for the code.
 
@@ -75,14 +75,14 @@ Implement the dynamic test generation for the static type proof for the followin
 
 Field access is a little tricky because `a` where `a` is a field is just a `SimpleName`. If you have `this.a`, then it becomes a `FieldAccess` expression. And finally, `n.a` where `n` is some object is a `QualifiedName`.
 
-Nesting therefore appears as a `QualifiedName` expression that nests the traversal of field accesses as in `a.b.c.d`. The nesting is in the `QualifiedName`. The first level `QualifiedName` has `d` as the name with `a.b.c` as a qualifier which is a `QualifiedName` expression. That next level `QualifiedName` has `c` as the name with `a.b` as a qualifier in the `QualifiedName`. This last `QualifiedName` bottoms out with `b` as the name a `a` as the qualifier which in this case is a `SimpleName` expression. The type proof must first bottom out to the first type (the `typeof(a)` in this case), and then build up the proof returning from recursion.
+Nesting therefore appears as a `QualifiedName` expression that nests the traversal of field accesses as in `a.b.c.d`. The nesting is in the `QualifiedName`. The first level `QualifiedName` has `d` as the name with `a.b.c` as a qualifier which is a `QualifiedName` expression. That next level `QualifiedName` has `c` as the name with `a.b` as a qualifier in the `QualifiedName`. This last `QualifiedName` bottoms out with `b` as the name `a` as the qualifier which in this case is a `SimpleName` expression. The type proof must first bottom out to the first type (the `typeof(a)` in this case), and then build up the proof returning from recursion.
 
 ## Test Code
 
 There should be at least four sets of tests for this lab:
 
   1. Tests for the symbol table
-  2. Tests that test the dynamically generated type proof tests to see if the generation code is correct using---those tests should use mocks or spys with the Mockito Verify interface to check interactions with the symbol table
+  2. Tests that test the dynamically generated type proof tests to see if the generation code is correct---those tests should use mocks or spys with the Mockito Verify interface to check interactions with the symbol table
   3. Tests for the actual type proof (run the dynamically generated tests that prove if a program is statically type safe) 
   4. Integration tests that use both the symbol table implementation (rather than a mock---a spy is fine too you want to verify interactions) and the type proof visitor
 
@@ -96,7 +96,7 @@ For the dynamically generated tests The JUnit report from Surefire is not super 
 ERROR ... test Should_proveTypeSafe_When_oneFieldWithInitializer[3][1][1][2] ... failed ...
 ```
 
-Here `Should_proveTypeSafe_When_oneFieldWithInitializer` is the name of the test factory. The sequence of numbers in the bracket is the path in the tree to the actual failed test. The output is *not* helpful in debugging. Using an IDE for the report is strongly encouraged. Anyways, the array idices in the sequence are one-based (and not zero-based). In this example it refers to the 3rd child, 1st child, 1st child, and 2nd child relative to the base container for the compilation unit. The child at that leaf is the test that failed. In such a path, each index is an index into the list of `DynamicNodes` at the current node in the tree. The node at that index should be a `DynamicContainer` unless it is the last entry in the path in which case it should be a `DynamicTest`.
+Here `Should_proveTypeSafe_When_oneFieldWithInitializer` is the name of the test factory. The sequence of numbers in the bracket is the path in the tree to the actual failed test. The output is *not* helpful in debugging. Using an IDE for the report is strongly encouraged. Anyways, the array indices in the sequence are one-based (and not zero-based). In this example it refers to the 3rd child, 1st child, 1st child, and 2nd child relative to the base container for the compilation unit. The child at that leaf is the test that failed. In such a path, each index is an index into the list of `DynamicNodes` at the current node in the tree. The node at that index should be a `DynamicContainer` unless it is the last entry in the path in which case it should be a `DynamicTest`.
 
 The type (2) tests are trickier. These tests would need to inspect the dynamic generated tests to see if they have the right structure and content. As such, the dynamic tests would not run. They would be generated and inspected programmatically with JUnit tests that would fail when a generated test was not what was expected.
 
@@ -146,3 +146,89 @@ Create a pull request when the lab is done. Submit to Canvas the URL of the repo
 | `Assignment` implementation | 5 | 
 | `NumberLiterals`, `StringLiterals`, and `BooleanLiterals` implementation | 5 | 
 | Style, documentation, naming conventions, test organization, readability, etc. | 30 | 
+
+
+# Supported Language Features:
+
+* ASTNode
+
+  * BodyDeclaration
+
+    * **TypeDeclaration**
+    * **FieldDeclaration**
+    * **MethodDeclaration**
+  
+  * **CompilationUnit**
+  
+  * Statement
+
+    * **Block**
+    * EmptyStatement
+    * **ExpressionStatement**
+    * **IfStatement**
+    * **ReturnStatement**
+    * **VariableDeclarationStatement (single variable at a time with or without initializer)**
+    * **WhileStatement**
+    
+  * **VariableDeclaration** (part of a `VariableDeclarationStatement`)
+
+    * **VariableDeclarationFragment**
+
+  * Expression
+
+    * **Assignment**
+    * **BooleanLiteral**
+    * ClassInstanceCreation
+    * **FieldAccess**
+    * **InfixExpression** (+, *, -, <, ==, &&, ||)
+    * **MethodInvocation**
+    * **Name**
+
+      * **QualifiedName**
+      * **SimpleName**
+
+    * **NullLiteral**
+    * **NumberLiteral**
+    * **ParenthesizedExpression
+    * **PrefixExpression** (! only)
+    * StringLiteral
+    * ThisExpression (e.g. ClassName.this)
+
+# Final version to implement (quickly)
+
+  * Provide SymbolTable with pushScope, popScope, and addLocal functionality
+  * Single class declarations with fields
+  * Names for all entities are unique: no shadowing of any kind
+  * Field references always `this.field`
+  * A type-proof for a compilation unit is that all methods are type-correct
+  * `int`, `boolean`, `nullType`, and objects are the only types
+  * Operators `+`, `-`, and `*` are `int x int --> int`
+  * Operators `&&` and `||` are `boolean x boolean --> boolean`
+  * Operator `<` is `int x int --> boolean`
+  * Operator `!` is `boolean --> boolean`
+  * Operator `==` is `Object x Object --> boolean` where `Object` is class name plus `nullType`, `int x int --> boolean`, or `boolean x boolean --> boolean`
+  * Operator `=` is like `==` only it results in `unit`, so `object x Object --> unit` here `object` is some class name where `Object` is class name plus `nullType`
+  * Lab 3 does, 
+  
+    * `Assignment` with type `unit`
+    * `BooleanLiteral` with type `boolean`
+    * `NumberLiteral` with type `int`
+    * `NullLiteral` with type `nullType`
+    * `InfixExpression` for `+`, `*`, and `-` with type according to above rules
+    * `ExpressionStatement` for `Assignment`
+    * `MethodDeclaration` (provided)
+    * `CompilationUnit` (provided)
+    * `Block` (provided)
+    * Run tests and visual inspect for correctness
+
+  * Lab 2 does
+
+    * `FieldAccess` with the type of the field
+    * `InfixExpression` for `&&`, `||`, `<`, and `==` with type according to above rules
+    * `PrefixExpression` for `!`
+    * `Block` expanded to handle local variables
+    * `VariableDeclarationStatement` with type `unit`
+    * `IfStatement` with type `unit`
+    * `ReturnStatement` with unit
+    * `WhileStatement`
+    * Write tests to test the tests (no more visual inspection)
