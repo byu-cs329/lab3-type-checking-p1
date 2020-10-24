@@ -24,6 +24,13 @@ public class TypeCheckTypes {
     return type.equals(VOID);
   }
 
+  /**
+   * Detremines if two types are assignment compatible.
+   * 
+   * @param leftType type
+   * @param rightType type
+   * @return true if assignment compatible
+   */
   public static boolean isAssgnmentCompatible(String leftType, String rightType) {
     if (isError(leftType) || isError(rightType)) {
       return false;

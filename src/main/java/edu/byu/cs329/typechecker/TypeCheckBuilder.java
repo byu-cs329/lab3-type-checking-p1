@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -81,17 +80,19 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       
       String name = Utils.buildName(className, Utils.getName(node));
-      String type = TypeCheckTypes.VOID;
       
       Map<String, String> typeMap = symbolTable.getParameterTypeMap(name); 
       symbolTable.pushScope();
       for (Map.Entry<String, String> entry : typeMap.entrySet()) {
         symbolTable.addLocal(entry.getKey(), entry.getValue());
       }
+
       symbolTable.addLocal("this", className);
+      String type = symbolTable.getType(name);
       symbolTable.addLocal("return", type);
       
       node.getBody().accept(this);
+      type = TypeCheckTypes.VOID;
       type = shouldBeVoid(type, popType());
 
       pushType(type);
@@ -328,6 +329,14 @@ public class TypeCheckBuilder {
   public TypeCheckBuilder() {
   }
   
+  /**
+   * Returns true if static type safe with the checks.
+   * 
+   * @param symbolTable the environment for the type checks
+   * @param node the ASTNode for the compilation unit
+   * @param tests a container to hold the tests
+   * @return true iff the compilation is static type safe
+   */
   public boolean getTypeChecker(ISymbolTable symbolTable, ASTNode node, List<DynamicNode> tests) {
     Visitor visitor = new Visitor(symbolTable);
     node.accept(visitor);

@@ -98,7 +98,7 @@ public class Utils {
    * @param name name of file.
    * @return AST node for the CompilationUnit in the file
    */
-  public static ASTNode getASTNodeFor(final Object t, String name){
+  public static ASTNode getAstNodeFor(final Object t, String name) {
     URI uri = Utils.getUri(t, name);
     requiresNonNull(uri, "failed to find " + name + "in the class path");
     ASTNode root = Utils.getCompilationUnit(uri);
@@ -184,42 +184,16 @@ public class Utils {
     return Utils.getName(field.fragments());
   }
 
-  public static String getType(FieldDeclaration field) {
-    return Utils.getType(field.getType());
-  }
-
   public static String getName(MethodDeclaration method) {
     return Utils.getName(method.getName());
-  }
-
-  public static String getType(MethodDeclaration method) {
-    return Utils.getType(method.getReturnType2());
   }
 
   public static String getName(VariableDeclaration declaration) {
     return Utils.getName(declaration.getName());
   }
 
-  public static String getType(SingleVariableDeclaration declaration) {
-      return Utils.getType(declaration.getType());
-  }
-
   public static String getName(VariableDeclarationStatement declaration) {
     return Utils.getName(declaration.fragments());
-  }
-
-  public static String getType(VariableDeclarationStatement declaration) {
-    return Utils.getType(declaration.getType());
-  }
-
-  public static Expression getInitializer(VariableDeclarationStatement declarationStatement) {
-    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
-    return declaration.getInitializer();   
-  }
-
-  public static SimpleName getSimpleName(VariableDeclarationStatement declarationStatement) {
-    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
-    return declaration.getName();   
   }
 
   public static String getName(SimpleName name) {
@@ -229,6 +203,22 @@ public class Utils {
   private static String getName(Object fragments) {
     VariableDeclaration declaration = Utils.getFragment(fragments);
     return Utils.getName(declaration.getName());
+  }
+
+  public static String getType(FieldDeclaration field) {
+    return Utils.getType(field.getType());
+  }
+
+  public static String getType(MethodDeclaration method) {
+    return Utils.getType(method.getReturnType2());
+  }
+  
+  public static String getType(SingleVariableDeclaration declaration) {
+    return Utils.getType(declaration.getType());
+  }
+
+  public static String getType(VariableDeclarationStatement declaration) {
+    return Utils.getType(declaration.getType());
   }
 
   private static String getType(Type type) {
@@ -272,6 +262,16 @@ public class Utils {
     return typeName;
   }
 
+  public static Expression getInitializer(VariableDeclarationStatement declarationStatement) {
+    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
+    return declaration.getInitializer();   
+  }
+
+  public static SimpleName getSimpleName(VariableDeclarationStatement declarationStatement) {
+    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
+    return declaration.getName();   
+  }
+  
   private static VariableDeclaration getFragment(Object fragments) {
     @SuppressWarnings("unchecked")
     List<VariableDeclaration> fragmentList = (List<VariableDeclaration>) fragments;

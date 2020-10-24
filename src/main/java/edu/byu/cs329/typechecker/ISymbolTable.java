@@ -14,8 +14,8 @@ public interface ISymbolTable {
    * 
    * @param name is a local variable or parameter as in "v",
    *     an object instance reference as "this", 
-   *     a field reference as <class>.<field> as in "A.f",
-   *     a method reference as <class>.<method> as in "A.m",
+   *     a field reference as "class"."field" as in "A.f",
+   *     a method reference as "class"."method" as in "A.m",
    *     a boolean literal as in "true" or "false", or
    *     a integer literal as in "10"
    * @return associated type for name
@@ -25,7 +25,7 @@ public interface ISymbolTable {
   /**
    * Gives the parameters associated with a name.
    * 
-   * @param name a method reference as <class>.<method> as in "A.m",
+   * @param name a method reference as "class'."method" as in "A.m",
    * @return the type map for associated parameter names
    */
   public Map<String, String> getParameterTypeMap(String name);

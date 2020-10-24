@@ -6,7 +6,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -70,12 +69,32 @@ public class SymbolTableBuilder {
 
       // Not tested
       if (typeMap.containsKey(name)) {
-        Utils.throwRuntimeException(name + " already exists in symbol table with type " + typeMap.get(name));
+        Utils.throwRuntimeException(name 
+            + " already exists in symbol table with type " 
+            + typeMap.get(name));
       }
 
       typeMap.put(name, type);
       Map<String, String> typeMap = getParameterTypeMap(node.parameters());
       parameterTypeMap.put(name, typeMap);
+      return false;
+    }
+
+    @Override
+    public boolean visit(FieldDeclaration node) {
+      checkModifiers(node.getModifiers());
+      String type = Utils.getType(node);
+      String fieldName = Utils.getName(node);
+      String name = Utils.buildName(className, fieldName);
+
+      // Not tested
+      if (typeMap.containsKey(name)) {
+        Utils.throwRuntimeException(name 
+            + " already exists in symbol table with type " 
+            + typeMap.get(name));
+      }
+      
+      typeMap.put(name, type);
       return false;
     }
 
@@ -91,26 +110,11 @@ public class SymbolTableBuilder {
       return typeMap;
     }
 
-    @Override
-    public boolean visit(FieldDeclaration node) {
-      checkModifiers(node.getModifiers());
-      String type = Utils.getType(node);
-      String fieldName = Utils.getName(node);
-      String name = Utils.buildName(className, fieldName);
-
-      // Not tested
-      if (typeMap.containsKey(name)) {
-        Utils.throwRuntimeException(name + " already exists in symbol table with type " + typeMap.get(name));
-      }
-      
-      typeMap.put(name, type);
-      return false;
-    }
-
     private void checkModifiers(int modifiers) {
       int mask = ~(Modifier.PRIVATE | Modifier.PUBLIC | Modifier.PROTECTED);
       if ((modifiers & mask) != 0) {
-        Utils.throwRuntimeException("only private, public, and protected are supported as modifiers");
+        Utils.throwRuntimeException(
+            "only private, public, and protected are supported as modifiers");
       }
     }
 
@@ -134,7 +138,7 @@ public class SymbolTableBuilder {
     Deque<Map<String, String>> typeMap = new ArrayDeque<Map<String, String>>();
     typeMap.push(visitor.typeMap);
     
-    return new ISymbolTable(){    
+    return new ISymbolTable() {    
       @Override
       public String getType(String name) {
         for (Map<String, String> map : typeMap) {
