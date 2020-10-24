@@ -21,7 +21,7 @@ public class TypeCheckBuilderTests {
   static final Logger log = LoggerFactory.getLogger(TypeCheckBuilderTests.class);
 
   private boolean getTypeChecker(final String fileName, List<DynamicNode> tests) {
-    ASTNode compilationUnit = Utils.getASTNodeFor(this, fileName);
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, fileName);
     SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
     ISymbolTable symbolTable = symbolTableBuilder.getSymbolTable(compilationUnit);
     TypeCheckBuilder typeCheckerBuilder = new TypeCheckBuilder();
