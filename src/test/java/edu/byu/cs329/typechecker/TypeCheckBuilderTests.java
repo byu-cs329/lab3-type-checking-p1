@@ -96,7 +96,7 @@ public class TypeCheckBuilderTests {
     // return tests.stream();
     //
     // Option 2: test only isTypeSafe and show no details
-    DynamicTest test = DynamicTest.dynamicTest("isTypeSafe", () -> assertFalse(isTypeSafe));
+    DynamicTest test = DynamicTest.dynamicTest("isNotTypeSafe", () -> assertFalse(isTypeSafe));
     return Arrays.asList((DynamicNode)test).stream();
   }
 }
