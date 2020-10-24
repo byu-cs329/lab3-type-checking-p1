@@ -12,115 +12,85 @@ Review carefully the [type checking](https://bitbucket.org/byucs329/byu-cs-329-l
 
 # Java Subset
 
-The static type checker should support a [subset of Java](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). If something seems unusually hard then be sure it is in the [language subset](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). 
+A general overview of what is allowed in the subset:
+
+  * No imports and nothing from `java.lang` such as `Integer` except for some limited tests (see existing tests)
+  * A `CompilationUnit` has a single `TypeDeclaration` in it's declarations
+  * A type-proof for a compilation unit is that all methods are type-correct in the class
+  * All `FieldDeclaration` instances have no **initializer** 
+  * Names for all entities are unique: no shadowing of any kind
+  * Field references are type `FieldAccess` of the form `this.field` 
+  * `int`, `boolean`, `NullType` (e.g., `NullLiteral`), and objects are the only types
+  * `InfixExpression` instances for operators `+`, `-`, and `*` are always  `int,int:int` (e.g, expecting two `int` types and returning an `int` type)
+  * `InfixExpression` instances for operators `&&` and `||` are always `boolean,boolean:boolean`
+  * `InfixExpression` instances for operator `<` are always `int,int:boolean`
+  * `PrefixExpression` instances for operator `!` are `boolean:boolean`
+  * `InfixExpression` instances for operator `==` are always `Object,Object:boolean` where `Object` is an object type or `nullType`, `int,int:boolean`, or `boolean,boolean:boolean`
+  * Assignment between objects is like the `==` requiring types to be the same with the added ability te assign objects to `null`.
+  * No constructors
+
+The type-checker must eventually prove the following:
+
+  * `MethodDeclaration` (provided)
+  * `CompilationUnit` (provided)
+  * `Block` (provided)
+  * `BooleanLiteral` with type `boolean` (provided)
+  * `NumberLiteral` with type `int` (provided)
+  * `NullLiteral` with type `nullType` (provided)
+  * `VariableDeclarationStatement` (provided)
+  * `ReturnStatement` (lab 3)
+  * `ExpressionStatement` for `Assignment` (lab 3)
+  * `PrefixExpression` for `!` (lab 3)
+  * `InfixExpression` for `+`, `*`, and `-` with type according to above rules (lab 3)
+  * `InfixExpression` for `&&`, `||`, `<`, and `==` with type according to above rules (lab 3)
+  * `IfStatement` with type `void` (lab 3)
+  * `WhileStatement` with type `void` (lab 3)  
+  * `FieldAccess` with the type of the field as it `this.a` (lab 4)
+  * `QualifiedName` for `n.a` where `n` is a variable (lab 4)
+  * `ExpressionStatement` for `MethodInvocation` (lab 4)
+
+If something seems unusually hard then be sure it is in the [language subset](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/java-subset/java-subset.md). 
 
 # Symbol Table Interface
 
-All of the environment is in the symbol table for the type proof. The table itself is mostly static, meaning the information does not change after the table is constructed, except for local variables that are added and removed as the type proof is constructed. Only use the `ISymbolTable` interface in the visitor to construct the type proof. The implementation of the `ISymbolTable` that is a part of this lab may use methods beyond what is in the `ISymbolTable` interface. So in building the symbol table, create and use any methods needed. Using the symbol table to construct the type proof, only use the `ISymbolTable` interface and store the symbol table as an instance of the `ISymbolTable` interface.
-
-The symbol table relies on the class name to find fields, methods, and parameters. The type checker, and symbol table, do not support imports, so there will never be more than one input file. The implication is two fold: fully qualified names are not needed (ignore the package declaration) and there will be no more than one top level class in the input file (Java convention). That said, the class may have any number of nested classes. 
-
-Java names nested classes with a path of class names, outermost class to target class, and that path is separated by the `$` sign. Consider the following:
-
-```java
-class F {
-  class G {
-    int y;
-    class H {
-    }
-  }
-}
-```
-
-The name of for the inner most class by convention is `F$G$H`: ```F$G$H x = new F$G$H()```. The symbol table will associate fields, methods, etc. with that `$`-separated name. As the symbol table is constructed, the class name needs to be tracked, with a stack, and updated as appropriate. Creating the class name from a stack is direct.
-
-```java
-className = this.className.stream().collect(Collectors.joining("$"));
-```
-
-Something what makes lookup hard is that inner classes may reference fields in outer classes as in an instance of `F$G$H` using `F$G.y` in a method as `y = 10`. When looking up the type for `y`, the lookup needs to first check the local variables for `y`, then the fields of the current class `F$G$H` in this example, and then move up through the nested classes checking for the variable in those fields. As such, when it checks for `F$G.f` it will find the name and return the `int` type. 
-
-The lookup can use the class name stack as in the above and pop names off the stack in doing the look up though the classes (though it will need to first copy the stack to preserve it for later lookups). If the code actually uses the qualified name as in `F$G.y = 10`, then there will be a qualified name in the `ASTNode` along with the simple name `y` (stored in two separate areas). Use the simple name and created the full name from the stack to avoid having to special case; although, it may be that the fully qualified name is always populated as well and can be used. Do whatever is easiest and most clear for the code.
-
-The symbol table, as the environment for the proof, also needs to return types for literals: `String getNumberLiteralType(String token);`. For numbers, always return the narrowest type (least number of bits needed). The Java API throws an exception when a provide string cannot be converted (e.g., `Short.parseShort(token)` will throw an exception if the string token is not a short because it is too big, too small, or uses invalid characters). 
+The lab code includes a symbol table. It also checks many of the above properties for the Java subset (see the code).
+Only use the `ISymbolTable` interface to construct the type proof. The JavaDocs in `ISymbolTable` define the interface. When in doubt, look at `SymbolTableBuilder`. The symbol table is provided as is. Please report and fix defects.
 
 # Type proof
 
 The [lecture notes](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/type-checking.md) are somewhat extensive on constructing the type proof and detailing a possible implementation. Take time to really understand the lecture notes (maybe even start coding from the lecture notes) before getting too far into this lab.
 
-The recursion can be confusing, and keeping track of state between different visit methods is confusing as well. Build as simple a mental model as possible. The [lecture notes](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/type-checking.md) suggest a stack model where each visit pushes a list on a stack to collect obligations and then pops that list at the end of the visit, builds a container, and adds that container to the obligations on the top of the stack. This model implies that the stack is initialized with a list to hold the final container for the class. The model is simple and effectively maps to a visitor pattern: `visit` pushes while `endVisit` pops and adds to the list on the top of the stack.
+The provided implementation uses two stacks to manage the type checking: `typeStack` and `typeCheckStack`. The first is the return type of the most recent node in the recursion tree for the type check and is the type returned on the edges. The second is the set of obligations that must hold at a node in the recursion true that determine the type to return on the edge. These checks are actual JUnit 5 tests.
+
+The recursion can be confusing, and keeping track of state between different visit methods is confusing as well.  The provided code is one way to do it. In general, a `visit` method is a node in the recursion tree. So it pushes an empty set of checks on the `typeCheckStack` and adds obligations to that set as it progresses. At the end of the visit, it pushes the resulting type for the node in the `typeStack` as the return.
+
+The `endVisit` method pops the set of checks from the `typeCheckStack`, wraps them in a container so the checks for the node are self-contained, and then adds that container to the set of obligations at the top of the stack. It is confusing. I agree. Read and study the provided implementations. There is a pattern for the `visit` and `endVisit` followed by every type. Follow that pattern!
+
+## Utils
+
+The `Utils` class provides a bevy of helper methods in the form of `getName` and `getType` to get the name and type from `ASTNodes`. Always check `Utils` before digging too deep into the `ASTNode` type to find something. More than likely what is needed is already there. There are many examples in both `SymbolTableBuilder` and `TypeCheckBuilder` using `Utils` and working with the different `ASTNode` types for this lab. Be sure to look in these files first.
 
 # Lab Requirements
 
 It is strongly encouraged to adopt a test driven approach to the lab. Define a test, implement code to pass the test, and then repeat. Take some time at the front-end to plan out the test progression in a sensible way. A test driven approach will make the lab feel more manageable (gives an obvious place to start), and it will help provide an incremental approach to implementing features.
 
-## Symbol Table
+Implement the dynamic test generation for the static type proof for the following language features:
 
-Implement the symbol table and a test framework for the symbol table with an appropriate set of tests. Justify the framework and the tests. Be sure the tests include handling local variables. 
+  * `ReturnStatement` (lab 3)
+  * `ExpressionStatement` for `Assignment` (lab 3)
+  * `PrefixExpression` for `!` (lab 3)
+  * `InfixExpression` for `+`, `*`, and `-` with type according to above rules (lab 3)
+  * `InfixExpression` for `&&`, `||`, `<`, and `==` with type according to above rules (lab 3)
+  * `IfStatement` with type `void` (lab 3)
+  * `WhileStatement` with type `void` (lab 3)  
 
-## Type Proofs
+Implement a minimum number of tests for each of the above language features. The provided code includes an existing test framework to use. In general, the input file should either pass or fail the type-check tests. If it passes, running the type-check tests works. If it is a input intended to fail, then running the type-check tests is only desired for debugging purposes as the checks show the outcome of each obligation in the check so it is easy to spot what is not right. But for testing, it is bad because there are always failed tests.
 
-Implement the dynamic test generation for the static type proof for the following language features using a mock for the symbol table. 
+To give the ability to check both input that should type-check and input that should not type-check, the test framework is able to only check the final type returned from the type-check. If the input should pass, then that type is `TypeCheckTypes.VOID`. If the input should fail, then that type is `TypeCheckTypes.ERROR`. The provided code shows hawe to decide which to use for testing and debugging.
 
-  * `CompilationUnit` (top level file)
-  * `TypeDeclaration` (classes)
-  * `MethodDeclaration`
-  * `Block` (scopes)
-  * `EmptyStatement`
-  * `FieldAccess` that is created with the  `ThisExpression` (captures the `this` keyword)
-  * `QualifiedName` (used for all other field access such as `a.b.c.d`)
-  * `VariableDeclarationFragment` with initializers for fields and local variables
-  * `Assignment`
-  * `NumberLiterals`, `StringLiterals`, and `BooleanLiterals`
+Finally, not all IDEs display dynamic tests in a useful way. If the IDE you are using is one of those (e.g. Visual Studio Code), then the `pom.xml` configures `mvn compile test exec:java` to run the tests in the JUnit 5 standalone. The standalone output is super helpful for debugging as it organizes all the tests in a tree structure that lends itself to visual inspection.
 
-Field access is a little tricky because `a` where `a` is a field is just a `SimpleName`. If you have `this.a`, then it becomes a `FieldAccess` expression. And finally, `n.a` where `n` is some object is a `QualifiedName`.
-
-Nesting therefore appears as a `QualifiedName` expression that nests the traversal of field accesses as in `a.b.c.d`. The nesting is in the `QualifiedName`. The first level `QualifiedName` has `d` as the name with `a.b.c` as a qualifier which is a `QualifiedName` expression. That next level `QualifiedName` has `c` as the name with `a.b` as a qualifier in the `QualifiedName`. This last `QualifiedName` bottoms out with `b` as the name `a` as the qualifier which in this case is a `SimpleName` expression. The type proof must first bottom out to the first type (the `typeof(a)` in this case), and then build up the proof returning from recursion.
-
-## Test Code
-
-There should be at least four sets of tests for this lab:
-
-  1. Tests for the symbol table
-  2. Tests that test the dynamically generated type proof tests to see if the generation code is correct---those tests should use mocks or spys with the Mockito Verify interface to check interactions with the symbol table
-  3. Tests for the actual type proof (run the dynamically generated tests that prove if a program is statically type safe) 
-  4. Integration tests that use both the symbol table implementation (rather than a mock---a spy is fine too you want to verify interactions) and the type proof visitor
-
-The tests should check files that type check and files that do not type check.
-
-Tests of type (1), (3), and (4) are easy. Just run your tests on different Java input files.  
-
-For the dynamically generated tests The JUnit report from Surefire is not super ideal (and efforts to find a better solution not yielded anything better). The Eclipse IDE shows every test and container in a tree structure; its report is super easy to read because it visualizes the tree structure of the type proof. The surefire report is much much less obvious only reporting the name of the test factory method with a path to the failing test. For example, if a test fails in the type proof, the output is something like
-
-```
-ERROR ... test Should_proveTypeSafe_When_oneFieldWithInitializer[3][1][1][2] ... failed ...
-```
-
-Here `Should_proveTypeSafe_When_oneFieldWithInitializer` is the name of the test factory. The sequence of numbers in the bracket is the path in the tree to the actual failed test. The output is *not* helpful in debugging. Using an IDE for the report is strongly encouraged. Anyways, the array indices in the sequence are one-based (and not zero-based). In this example it refers to the 3rd child, 1st child, 1st child, and 2nd child relative to the base container for the compilation unit. The child at that leaf is the test that failed. In such a path, each index is an index into the list of `DynamicNodes` at the current node in the tree. The node at that index should be a `DynamicContainer` unless it is the last entry in the path in which case it should be a `DynamicTest`.
-
-The type (2) tests are trickier. These tests would need to inspect the dynamic generated tests to see if they have the right structure and content. As such, the dynamic tests would not run. They would be generated and inspected programmatically with JUnit tests that would fail when a generated test was not what was expected.
-
-The `DynamicNode` class provides a `DynamicNode.getDisplayName()` method. The `DynamicContainer` gives access to the stream of nodes (`DynamicContainer.getChilderen()`) and the `DynamicContainer` gives access to the embedded executable (`DynamicTest.getExecutable()`). `Executable.execute()` runs that test. If the test fails, it throws a `AssertionFailedError` or subclass of that.
-
-```java
-@Test
-  void myTest() {
-    Collection<DynamicNode> tests = dynamicTestsFromCollection();
-    Iterator<DynamicNode> iter = tests.iterator();
-    DynamicNode n = iter.next();
-    Assertions.assertTrue(n instanceof DynamicTest);
-    DynamicTest t = (DynamicTest) n;
-    Assertions.assertDoesNotThrow(t.getExecutable());
-    n = iter.next();
-    Assertions.assertTrue(n instanceof DynamicTest);
-    t = (DynamicTest) n;
-    Assertions.assertThrows(AssertionFailedError.class, t.getExecutable());
-  }
-```
-
-The above is more detailed than it should be for the type checker test code, but it shows some of what is possible. The `DynamicContainer` only give access to a stream, but from there it should be possible to roughly test for an expected structure it terms of containers, number of tests, or even number of tests in each container.
-
-The [lecture notes](https://bitbucket.org/byucs329/byu-cs-329-lecture-notes/src/master/type-checking.md) have a detailed discussion to what these tests might look like for the type checker.
+For this lab, visual inspection coupled with making sure what should pass passes and what should fail fails is sufficient. The next lab will begin to explore how to write tests to test the tests!
 
 # What to turn in?
 
@@ -146,89 +116,3 @@ Create a pull request when the lab is done. Submit to Canvas the URL of the repo
 | `Assignment` implementation | 5 | 
 | `NumberLiterals`, `StringLiterals`, and `BooleanLiterals` implementation | 5 | 
 | Style, documentation, naming conventions, test organization, readability, etc. | 30 | 
-
-
-# Supported Language Features:
-
-* ASTNode
-
-  * BodyDeclaration
-
-    * **TypeDeclaration**
-    * **FieldDeclaration**
-    * **MethodDeclaration**
-  
-  * **CompilationUnit**
-  
-  * Statement
-
-    * **Block**
-    * EmptyStatement
-    * **ExpressionStatement**
-    * **IfStatement**
-    * **ReturnStatement**
-    * **VariableDeclarationStatement (single variable at a time with or without initializer)**
-    * **WhileStatement**
-    
-  * **VariableDeclaration** (part of a `VariableDeclarationStatement`)
-
-    * **VariableDeclarationFragment**
-
-  * Expression
-
-    * **Assignment**
-    * **BooleanLiteral**
-    * ClassInstanceCreation
-    * **FieldAccess**
-    * **InfixExpression** (+, *, -, <, ==, &&, ||)
-    * **MethodInvocation**
-    * **Name**
-
-      * **QualifiedName**
-      * **SimpleName**
-
-    * **NullLiteral**
-    * **NumberLiteral**
-    * **ParenthesizedExpression
-    * **PrefixExpression** (! only)
-    * StringLiteral
-    * ThisExpression (e.g. ClassName.this)
-
-# Final version to implement (quickly)
-
-  * Provide SymbolTable with pushScope, popScope, and addLocal functionality
-  * Single class declarations with fields
-  * Names for all entities are unique: no shadowing of any kind
-  * Field references always `this.field`
-  * A type-proof for a compilation unit is that all methods are type-correct
-  * `int`, `boolean`, `nullType`, and objects are the only types
-  * Operators `+`, `-`, and `*` are `int x int --> int`
-  * Operators `&&` and `||` are `boolean x boolean --> boolean`
-  * Operator `<` is `int x int --> boolean`
-  * Operator `!` is `boolean --> boolean`
-  * Operator `==` is `Object x Object --> boolean` where `Object` is class name plus `nullType`, `int x int --> boolean`, or `boolean x boolean --> boolean`
-  * Operator `=` is like `==` only it results in `unit`, so `object x Object --> unit` here `object` is some class name where `Object` is class name plus `nullType`
-  * Lab 3 does, 
-  
-    * `Assignment` with type `unit`
-    * `BooleanLiteral` with type `boolean`
-    * `NumberLiteral` with type `int`
-    * `NullLiteral` with type `nullType`
-    * `InfixExpression` for `+`, `*`, and `-` with type according to above rules
-    * `ExpressionStatement` for `Assignment`
-    * `MethodDeclaration` (provided)
-    * `CompilationUnit` (provided)
-    * `Block` (provided)
-    * Run tests and visual inspect for correctness
-
-  * Lab 2 does
-
-    * `FieldAccess` with the type of the field
-    * `InfixExpression` for `&&`, `||`, `<`, and `==` with type according to above rules
-    * `PrefixExpression` for `!`
-    * `Block` expanded to handle local variables
-    * `VariableDeclarationStatement` with type `unit`
-    * `IfStatement` with type `unit`
-    * `ReturnStatement` with unit
-    * `WhileStatement`
-    * Write tests to test the tests (no more visual inspection)

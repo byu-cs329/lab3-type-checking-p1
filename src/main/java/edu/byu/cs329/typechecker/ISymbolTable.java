@@ -25,7 +25,7 @@ public interface ISymbolTable {
   /**
    * Gives the parameters associated with a name.
    * 
-   * @param name a method reference as "class'."method" as in "A.m",
+   * @param name a method reference as "class"."method" as in "A.m",
    * @return the type map for associated parameter names
    */
   public Map<String, String> getParameterTypeMap(String name);
