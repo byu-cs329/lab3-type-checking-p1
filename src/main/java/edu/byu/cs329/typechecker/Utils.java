@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.slf4j.Logger;
@@ -174,6 +176,10 @@ public class Utils {
     return className + "." + name;
   }
 
+  public static String getName(TypeDeclaration classDeclaration) {
+    return Utils.getName(classDeclaration.getName());
+  }
+
   public static String getName(FieldDeclaration field) {
     return Utils.getName(field.fragments());
   }
@@ -206,18 +212,22 @@ public class Utils {
     return Utils.getType(declaration.getType());
   }
 
+  public static Expression getInitializer(VariableDeclarationStatement declarationStatement) {
+    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
+    return declaration.getInitializer();   
+  }
+
+  public static SimpleName getSimpleName(VariableDeclarationStatement declarationStatement) {
+    VariableDeclaration declaration = Utils.getFragment(declarationStatement.fragments());
+    return declaration.getName();   
+  }
+
   public static String getName(SimpleName name) {
     return name.getIdentifier();
   }
 
   private static String getName(Object fragments) {
-    @SuppressWarnings("unchecked")
-    List<VariableDeclaration> declarations = (List<VariableDeclaration>) (fragments);
-    if (declarations.size() > 1) {
-      Utils.throwRuntimeException("only one VariableDeclaration is allowed in fragments");
-    }
-
-    VariableDeclaration declaration = declarations.get(0);
+    VariableDeclaration declaration = Utils.getFragment(fragments);
     return Utils.getName(declaration.getName());
   }
 
@@ -248,11 +258,11 @@ public class Utils {
   private static String getType(PrimitiveType type) {
     String typeName = null;
     if (type.getPrimitiveTypeCode() == PrimitiveType.INT) {
-      typeName = ISymbolTable.INT;
+      typeName = TypeCheckTypes.INT;
     } else if (type.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-      typeName = ISymbolTable.BOOL;
+      typeName = TypeCheckTypes.BOOL;
     } else if (type.getPrimitiveTypeCode() == PrimitiveType.VOID) {
-      typeName = ISymbolTable.VOID;
+      typeName = TypeCheckTypes.VOID;
     } else {
       // Not tested
       Utils.throwRuntimeException("primitive type " 
@@ -260,5 +270,15 @@ public class Utils {
           + " is not an int, boolean, or void");
     }
     return typeName;
+  }
+
+  private static VariableDeclaration getFragment(Object fragments) {
+    @SuppressWarnings("unchecked")
+    List<VariableDeclaration> fragmentList = (List<VariableDeclaration>) fragments;
+    if (fragmentList.size() > 1) {
+      Utils.throwRuntimeException("only one VariableDeclaration is allowed in fragments");
+    }
+
+    return fragmentList.get(0);
   }
 }

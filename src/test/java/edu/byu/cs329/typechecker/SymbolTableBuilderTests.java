@@ -83,8 +83,8 @@ public class SymbolTableBuilderTests {
     ASTNode compilationUnit = Utils.getASTNodeFor(this, "symbolTable/should_addAllFields_when_allFieldsCorrectlyDeclared.java");
     ISymbolTable st = stb.getSymbolTable(compilationUnit);
     assertAll(
-        () -> assertEquals(ISymbolTable.INT, st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.i")),
-        () -> assertEquals(ISymbolTable.INT, st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.j")),
+        () -> assertEquals(TypeCheckTypes.INT, st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.i")),
+        () -> assertEquals(TypeCheckTypes.INT, st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.j")),
         () -> assertEquals("should_addAllFields_when_allFieldsCorrectlyDeclared", st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.k")),
         () -> assertEquals("Integer", st.getType("should_addAllFields_when_allFieldsCorrectlyDeclared.m"))
     );
@@ -101,9 +101,9 @@ public class SymbolTableBuilderTests {
     Map<String, String> typeMapForM = st.getParameterTypeMap(nameForM);
     Map<String, String> typeMapForN = st.getParameterTypeMap(nameForN);
     assertAll(
-        () -> assertEquals(ISymbolTable.VOID, st.getType(nameForM)),
+        () -> assertEquals(TypeCheckTypes.VOID, st.getType(nameForM)),
         () -> assertTrue(typeMapForM.containsKey("i")),
-        () -> assertEquals(ISymbolTable.INT, typeMapForM.get("i")),
+        () -> assertEquals(TypeCheckTypes.INT, typeMapForM.get("i")),
         () -> assertTrue(typeMapForM.containsKey("j")),
         () -> assertEquals("Integer", typeMapForM.get("j")),
         () -> assertEquals(0, typeMapForN.size())
@@ -118,11 +118,11 @@ public class SymbolTableBuilderTests {
     st.pushScope();
     st.addLocal("i", "int");
     st.addLocal("j", "Integer");
-    assertEquals(ISymbolTable.INT, st.getType("i"));
+    assertEquals(TypeCheckTypes.INT, st.getType("i"));
     assertEquals("Integer", st.getType("j"));
     st.popScope();
-    assertEquals(ISymbolTable.ERROR, st.getType("i"));
-    assertEquals(ISymbolTable.ERROR, st.getType("j"));
+    assertEquals(TypeCheckTypes.ERROR, st.getType("i"));
+    assertEquals(TypeCheckTypes.ERROR, st.getType("j"));
   }
 
   @Test

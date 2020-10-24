@@ -4,11 +4,6 @@ import java.util.Map;
 
 public interface ISymbolTable {
 
-  public static final String INT = "int";
-  public static final String BOOL = "boolean";
-  public static final String VOID = "void";
-  public static final String ERROR = "ERROR";
-
   /**
    * Gives the type associated with a name.
    * 

@@ -46,7 +46,7 @@ public class SymbolTableBuilder {
     @Override
     public boolean visit(TypeDeclaration node) {
       checkModifiers(node.getModifiers());
-      className = node.getName().getIdentifier();
+      className = Utils.getName(node);
       if (node.getTypes().length != 0) {
         Utils.throwRuntimeException("no type declarations allowed in " + className);
       }
@@ -142,7 +142,7 @@ public class SymbolTableBuilder {
             return map.get(name);
           }
         }
-        return ISymbolTable.ERROR;
+        return TypeCheckTypes.ERROR;
       }
 
       @Override
@@ -166,7 +166,7 @@ public class SymbolTableBuilder {
       @Override
       public void addLocal(String name, String type) { 
         String existingType = getType(name);
-        if (existingType.equals(ISymbolTable.ERROR)) {
+        if (existingType.equals(TypeCheckTypes.ERROR)) {
           typeMap.peek().put(name, type);
         } else {
           Utils.throwRuntimeException(name 
