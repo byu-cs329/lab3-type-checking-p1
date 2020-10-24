@@ -12,9 +12,12 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -51,7 +54,7 @@ public class TypeCheckBuilder {
       List<TypeDeclaration> typeDeclarations = (List<TypeDeclaration>)(node.types());
       for (TypeDeclaration declaration : typeDeclarations) {
         declaration.accept(this);
-        type = errorIfError(popType());
+        type = shouldBeVoid(type, popType());
       }
       
       pushType(type);
@@ -62,12 +65,11 @@ public class TypeCheckBuilder {
     public boolean visit(TypeDeclaration node) {
       pushTypeCheck(new ArrayList<>());
       className = Utils.getName(node);
-      pushType(className);
-
-      String type = className;
+    
+      String type = TypeCheckTypes.VOID;
       for (MethodDeclaration method : Arrays.asList(node.getMethods())) {
         method.accept(Visitor.this);
-        type = errorIfError(popType());
+        type = shouldBeVoid(type, popType());
       }
 
       pushType(type);
@@ -79,7 +81,7 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       
       String name = Utils.buildName(className, Utils.getName(node));
-      String type = symbolTable.getType(name);
+      String type = TypeCheckTypes.VOID;
       
       Map<String, String> typeMap = symbolTable.getParameterTypeMap(name); 
       symbolTable.pushScope();
@@ -90,7 +92,7 @@ public class TypeCheckBuilder {
       symbolTable.addLocal("return", type);
       
       node.getBody().accept(this);
-      type = errorIfError(popType());
+      type = shouldBeVoid(type, popType());
 
       pushType(type);
       return false;
@@ -106,7 +108,7 @@ public class TypeCheckBuilder {
       List<Statement> statements = (List<Statement>)node.statements();
       for (Statement statement : statements) {
         statement.accept(this);
-        type = errorIfError(popType());
+        type = shouldBeVoid(type, popType());
       }
 
       pushType(type);
@@ -120,21 +122,19 @@ public class TypeCheckBuilder {
       String type = Utils.getType(node);
       symbolTable.addLocal(name, type);
       Utils.getSimpleName(node).accept(this);
- 
+      
       type = (TypeCheckTypes.VOID);
       Expression initializer = Utils.getInitializer(node);
       if (initializer != null) {
         String leftType = popType();
-        type = errorIfError(leftType);
         initializer.accept(this);
         String rightType = popType();
-        type = errorIfError(rightType);
         DynamicTest test = generateAssignmentCompatibleTest(leftType, rightType);
-        type = errorIfError(type);
+        type = shouldBeVoid(type, popType());
         peekTypeCheck().add(test);
       } 
-
-      pushType(TypeCheckTypes.VOID);
+      
+      pushType(type);
       return false;
     }
 
@@ -143,11 +143,37 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       String name = Utils.getName(node);
       String type = symbolTable.getType(name);
-      String displayName = generateLookupDisplayName(name, type);
-      DynamicTest test = DynamicTest.dynamicTest(displayName, 
-          () -> Assertions.assertNotEquals(TypeCheckTypes.ERROR, type)
-      );
-      peekTypeCheck().add(test);
+      generatLookupTestAndAddToObligations(name, type);
+      pushType(type);
+      return false;
+    }
+
+    @Override
+    public boolean visit(BooleanLiteral node) {
+      pushTypeCheck(new ArrayList<>());
+      String name = node.toString();
+      String type = TypeCheckTypes.BOOL;
+      generatLookupTestAndAddToObligations(name, type);
+      pushType(type);
+      return false;
+    }
+
+    @Override
+    public boolean visit(NumberLiteral node) {
+      pushTypeCheck(new ArrayList<>());
+      String name = node.getToken();
+      String type = TypeCheckTypes.INT;
+      generatLookupTestAndAddToObligations(name, type);
+      pushType(type);
+      return false;
+    }
+
+    @Override
+    public boolean visit(NullLiteral node) {
+      pushTypeCheck(new ArrayList<>());
+      String name = node.toString();
+      String type = TypeCheckTypes.NULL;
+      generatLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
     }
@@ -184,11 +210,42 @@ public class TypeCheckBuilder {
       generateProofAndAddToObligations(name);
     }
 
-    private String errorIfError(String type) {
-      if (type.equals(TypeCheckTypes.ERROR)) {
+    @Override
+    public void endVisit(BooleanLiteral node) {
+      String name = node.toString();
+      generateProofAndAddToObligations(name);
+    }
+
+    @Override
+    public void endVisit(NumberLiteral node) {
+      String name = node.getToken();
+      generateProofAndAddToObligations(name);
+    }
+
+    @Override
+    public void endVisit(NullLiteral node) {
+      String name = node.toString();
+      generateProofAndAddToObligations(name);
+    }
+
+    private String shouldBeVoid(String currentType, String newType) {
+      if (currentType.equals(TypeCheckTypes.ERROR) || newType.equals(TypeCheckTypes.ERROR)) {
         return TypeCheckTypes.ERROR;
       }
-      return type;
+
+      if (!newType.equals(TypeCheckTypes.VOID)) {
+        return TypeCheckTypes.ERROR;
+      }
+
+      return newType;
+    }
+
+    private void generatLookupTestAndAddToObligations(String name, String type) {
+      String displayName = generateLookupDisplayName(name, type);
+      DynamicTest test = DynamicTest.dynamicTest(displayName, 
+          () -> Assertions.assertNotEquals(TypeCheckTypes.ERROR, type)
+      );
+      peekTypeCheck().add(test);
     }
 
     private void generateProofAndAddToObligations(String name) {
@@ -203,10 +260,11 @@ public class TypeCheckBuilder {
 
     private DynamicTest generateAssignmentCompatibleTest(String leftType, String rightType) {
       String displayName = leftType + " := " + rightType;
+      boolean isAssignmentCompatible = TypeCheckTypes.isAssgnmentCompatible(leftType, rightType);
       DynamicTest test = DynamicTest.dynamicTest(displayName, 
-          () -> assertTrue(TypeCheckTypes.isAssgnmentCompatible(leftType, rightType)));
-      String type = leftType;
-      if (!leftType.equals(rightType)) {
+          () -> assertTrue(isAssignmentCompatible));
+      String type = TypeCheckTypes.VOID;
+      if (!isAssignmentCompatible) {
         type = TypeCheckTypes.ERROR;
       }
       pushType(type);
@@ -270,9 +328,10 @@ public class TypeCheckBuilder {
   public TypeCheckBuilder() {
   }
   
-  public List<DynamicNode> getTypeChecker(ISymbolTable symbolTable, ASTNode node) {
+  public boolean getTypeChecker(ISymbolTable symbolTable, ASTNode node, List<DynamicNode> tests) {
     Visitor visitor = new Visitor(symbolTable);
     node.accept(visitor);
-	  return visitor.popTypeCheck();
+    tests.addAll(visitor.popTypeCheck());
+    return visitor.popType().equals(TypeCheckTypes.VOID);
   }
 }
