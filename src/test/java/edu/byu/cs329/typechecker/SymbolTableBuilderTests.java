@@ -22,58 +22,58 @@ public class SymbolTableBuilderTests {
   }
 
   @Test
-  @DisplayName("Should throw assertion when program has imports")
-  void should_throwAssertion_when_programHasImports() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_programHasImports.java");
+  @DisplayName("Should throw Exception when program has imports")
+  void should_throwException_when_programHasImports() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_programHasImports.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when program defines two classes")
-  void should_throwAssertion_when_programDefinesTwoClasses() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_programDefinesTwoClasses.java");
+  @DisplayName("Should throw Exception when program defines two classes")
+  void should_throwException_when_programDefinesTwoClasses() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_programDefinesTwoClasses.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when program defines inner class")
-  void should_throwAssertion_when_programDefinesInnerClass() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_programDefinesInnerClass.java");
+  @DisplayName("Should throw Exception when program defines inner class")
+  void should_throwException_when_programDefinesInnerClass() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_programDefinesInnerClass.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when multiple variables in fragments")
-  void should_throwAssertion_when_multipleVariablesInFragments() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_multipleVariablesInFragments.java");
+  @DisplayName("Should throw Exception when multiple variables in fragments")
+  void should_throwException_when_multipleVariablesInFragments() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_multipleVariablesInFragments.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when type name is not simple")
-  void should_throwAssertion_when_typeNameIsNotSimple() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_typeNameIsNotSimple.java");
+  @DisplayName("Should throw Exception when type name is not simple")
+  void should_throwException_when_typeNameIsNotSimple() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_typeNameIsNotSimple.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when primitive type is not int or boolean")
-  void should_throwAssertion_when_primitiveTypeIsNotIntOrBoolean() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_primitiveTypeIsNotIntOrBoolean.java");
+  @DisplayName("Should throw Exception when primitive type is not int or boolean")
+  void should_throwException_when_primitiveTypeIsNotIntOrBoolean() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_primitiveTypeIsNotIntOrBoolean.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when modifiers not private, public, or protected")
-  void should_throwAssertion_when_modifiersNotPrivatePublicProtected() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_modifiersNotPrivatePublicProtected.java");
+  @DisplayName("Should throw Exception when modifiers not private, public, or protected")
+  void should_throwException_when_modifiersNotPrivatePublicProtected() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_modifiersNotPrivatePublicProtected.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
   @Test
-  @DisplayName("Should throw assertion when methods have same name but different parameter types")
-  void should_throwAssertion_when_methodsHaveSameNameButDifferentParameterTypes() {
-    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwAssertion_when_methodsHaveSameNameButDifferentParameterTypes.java");
+  @DisplayName("Should throw Exception when methods have same name but different parameter types")
+  void should_throwException_when_methodsHaveSameNameButDifferentParameterTypes() {
+    ASTNode compilationUnit = Utils.getAstNodeFor(this, "symbolTable/should_throwException_when_methodsHaveSameNameButDifferentParameterTypes.java");
     assertThrows(RuntimeException.class, () -> stb.getSymbolTable(compilationUnit));
   }
 
