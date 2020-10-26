@@ -95,7 +95,7 @@ public class TypeCheckBuilderTests {
     // Option 1: mvn exec:java shows the details of the typeproof for visual inspection
     // return tests.stream();
     //
-    // Option 2: test only isTypeSafe and show no details
+    // Option 2: test only isNotTypeSafe and show no details
     DynamicTest test = DynamicTest.dynamicTest("isNotTypeSafe", () -> assertFalse(isTypeSafe));
     return Arrays.asList((DynamicNode)test).stream();
   }
