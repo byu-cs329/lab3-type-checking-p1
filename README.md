@@ -107,8 +107,8 @@ Create a pull request when the lab is done. Submit to Canvas the URL of the repo
 | ------- | ----------- |
 | `ReturnStatement:void` | 10 | 
 | `ReturnStatement:void` tests| 15 |
-| `ExpressionStatement:void` | 10 | 
-| `ExpressionStatement:void` tests | 15 | 
+| `ExpressionStatement:void` for `Assignment` | 10 | 
+| `ExpressionStatement:void` for `Assignment` tests | 15 | 
 | `PrefixExpression:boolean` | 10 |
 | `PrefixExpression:boolean` tests | 15 |
 | `InfixExpression:int` | 10 |
