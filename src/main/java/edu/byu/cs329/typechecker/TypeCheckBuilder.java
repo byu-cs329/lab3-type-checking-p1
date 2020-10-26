@@ -48,6 +48,7 @@ public class TypeCheckBuilder {
     
     @Override 
     public boolean visit(CompilationUnit node) {
+      pushTypeCheck(new ArrayList<>());
       String type = TypeCheckTypes.VOID;
       @SuppressWarnings("unchecked")
       List<TypeDeclaration> typeDeclarations = (List<TypeDeclaration>)(node.types());
@@ -133,7 +134,9 @@ public class TypeCheckBuilder {
         DynamicTest test = generateAssignmentCompatibleTest(leftType, rightType);
         type = shouldBeVoid(type, popType());
         peekTypeCheck().add(test);
-      } 
+      } else {
+        popType();
+      }
       
       pushType(type);
       return false;
@@ -177,6 +180,12 @@ public class TypeCheckBuilder {
       generatLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
+    }
+
+    @Override
+    public void endVisit(CompilationUnit node) {
+      String name = "CompilationUnit ";
+      generateProofAndAddToObligations(name);
     }
 
     @Override

@@ -52,7 +52,7 @@ The type-checker must eventually prove the following languague features. The not
   * `WhileStatement:void` (lab 3) 
   * `FieldAccess:<environment>` (e.g., `this.a`) (lab 4)
   * `QualifiedName:<environment>` (e.q., `n.a`) (lab 4)
-  * `MethodInvocation:<envoronment>` (lab 4)
+  * `MethodInvocation:<environment>` (lab 4)
 
 If something seems unusually hard then reach out to the instructor as it most likely out of scope or not intended. 
 
