@@ -147,7 +147,7 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       String name = Utils.getName(node);
       String type = symbolTable.getType(name);
-      generatLookupTestAndAddToObligations(name, type);
+      generateLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
     }
@@ -157,7 +157,7 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       String name = node.toString();
       String type = TypeCheckTypes.BOOL;
-      generatLookupTestAndAddToObligations(name, type);
+      generateLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
     }
@@ -167,7 +167,7 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       String name = node.getToken();
       String type = TypeCheckTypes.INT;
-      generatLookupTestAndAddToObligations(name, type);
+      generateLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
     }
@@ -177,7 +177,7 @@ public class TypeCheckBuilder {
       pushTypeCheck(new ArrayList<>());
       String name = node.toString();
       String type = TypeCheckTypes.NULL;
-      generatLookupTestAndAddToObligations(name, type);
+      generateLookupTestAndAddToObligations(name, type);
       pushType(type);
       return false;
     }
@@ -250,7 +250,7 @@ public class TypeCheckBuilder {
       return newType;
     }
 
-    private void generatLookupTestAndAddToObligations(String name, String type) {
+    private void generateLookupTestAndAddToObligations(String name, String type) {
       String displayName = generateLookupDisplayName(name, type);
       DynamicTest test = DynamicTest.dynamicTest(displayName, 
           () -> Assertions.assertNotEquals(TypeCheckTypes.ERROR, type)
