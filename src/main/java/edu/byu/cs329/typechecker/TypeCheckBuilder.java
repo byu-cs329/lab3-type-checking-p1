@@ -267,7 +267,8 @@ public class TypeCheckBuilder {
       obligations.add(proof);
     }
 
-    private DynamicTest generateTypeCompatibleTestAndPushResultingType(String leftType, String rightType) {
+    private DynamicTest generateTypeCompatibleTestAndPushResultingType(String leftType, 
+        String rightType) {
       String displayName = leftType + " := " + rightType;
       
       boolean isAssignmentCompatible = TypeCheckTypes.isAssgnmentCompatible(leftType, rightType);
