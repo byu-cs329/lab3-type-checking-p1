@@ -2,12 +2,12 @@ package edu.byu.cs329.typechecker;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
-import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -86,9 +86,9 @@ public class TypeCheckBuilder {
       
       String name = Utils.buildName(className, Utils.getName(node));
       
-      Map<String, String> typeMap = symbolTable.getParameterTypeMap(name); 
+      List<SimpleImmutableEntry<String, String>> typeList = symbolTable.getParameterTypeList(name); 
       symbolTable.pushScope();
-      for (Map.Entry<String, String> entry : typeMap.entrySet()) {
+      for (SimpleImmutableEntry<String, String> entry : typeList) {
         symbolTable.addLocal(entry.getKey(), entry.getValue());
       }
 

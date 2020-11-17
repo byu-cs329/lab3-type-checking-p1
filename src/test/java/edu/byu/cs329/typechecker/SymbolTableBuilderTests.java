@@ -3,9 +3,9 @@ package edu.byu.cs329.typechecker;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Map;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,15 +98,18 @@ public class SymbolTableBuilderTests {
     String className = "should_createParameterTypeMaps_when_methodsExist";
     String nameForM = Utils.buildName(className, "m");
     String nameForN = Utils.buildName(className, "n");
-    Map<String, String> typeMapForM = st.getParameterTypeMap(nameForM);
-    Map<String, String> typeMapForN = st.getParameterTypeMap(nameForN);
+    List<SimpleImmutableEntry<String, String>> typeListForM = st.getParameterTypeList(nameForM);
+    List<SimpleImmutableEntry<String, String>> typeListForN = st.getParameterTypeList(nameForN);
+    
     assertAll(
         () -> assertEquals(TypeCheckTypes.VOID, st.getType(nameForM)),
-        () -> assertTrue(typeMapForM.containsKey("i")),
-        () -> assertEquals(TypeCheckTypes.INT, typeMapForM.get("i")),
-        () -> assertTrue(typeMapForM.containsKey("j")),
-        () -> assertEquals("Integer", typeMapForM.get("j")),
-        () -> assertEquals(0, typeMapForN.size())
+        () -> assertEquals(2, typeListForM.size()),
+        () -> assertEquals(0, typeListForM.indexOf(
+              new SimpleImmutableEntry<String, String>("i", TypeCheckTypes.INT))),
+        () -> assertEquals(1, typeListForM.indexOf(
+                new SimpleImmutableEntry<String, String>("j", "Integer"))),
+        () -> assertEquals(TypeCheckTypes.INT, st.getType(nameForN)),
+        () -> assertEquals(0, typeListForN.size())
     );  
   }
 

@@ -1,6 +1,8 @@
 package edu.byu.cs329.typechecker;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
@@ -23,7 +25,8 @@ public class SymbolTableBuilder {
 
   class Visitor extends ASTVisitor {
     Map<String, String> typeMap = new HashMap<String, String>();
-    Map<String, Map<String, String>> parameterTypeMap = new HashMap<String, Map<String,String>>();
+    Map<String, List<SimpleImmutableEntry<String, String>>> parameterTypeMap = 
+        new HashMap<String, List<SimpleImmutableEntry<String, String>>>();
     String className = null;
 
     @Override
@@ -75,8 +78,8 @@ public class SymbolTableBuilder {
       }
 
       typeMap.put(name, type);
-      Map<String, String> typeMap = getParameterTypeMap(node.parameters());
-      parameterTypeMap.put(name, typeMap);
+      List<SimpleImmutableEntry<String, String>> typeList = getParameterTypeList(node.parameters());
+      parameterTypeMap.put(name, typeList);
       return false;
     }
 
@@ -98,16 +101,17 @@ public class SymbolTableBuilder {
       return false;
     }
 
-    private Map<String, String> getParameterTypeMap(Object o) {
+    private List<SimpleImmutableEntry<String, String>> getParameterTypeList(Object o) {
       @SuppressWarnings("unchecked")
       List<SingleVariableDeclaration> types = (List<SingleVariableDeclaration>)o;
-      Map<String, String> typeMap = new HashMap<String, String>();
+      List<SimpleImmutableEntry<String, String>> typeList = 
+          new ArrayList<SimpleImmutableEntry<String, String>>();
       for (SingleVariableDeclaration declaration : types) {
         String name = Utils.getName(declaration);
         String type = Utils.getType(declaration);
-        typeMap.put(name, type);
+        typeList.add(new SimpleImmutableEntry<String, String>(name, type));
       }
-      return typeMap;
+      return typeList;
     }
 
     private void checkModifiers(int modifiers) {
@@ -150,7 +154,7 @@ public class SymbolTableBuilder {
       }
 
       @Override
-      public Map<String, String> getParameterTypeMap(String name) {
+      public List<SimpleImmutableEntry<String, String>> getParameterTypeList(String name) {
         if (visitor.parameterTypeMap.containsKey(name)) {
           return visitor.parameterTypeMap.get(name);
         }

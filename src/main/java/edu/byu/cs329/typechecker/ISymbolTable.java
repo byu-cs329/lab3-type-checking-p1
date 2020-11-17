@@ -1,6 +1,7 @@
 package edu.byu.cs329.typechecker;
 
-import java.util.Map;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 
 public interface ISymbolTable {
 
@@ -23,12 +24,12 @@ public interface ISymbolTable {
   public String getType(String name);
 
   /**
-   * Gives the parameters associated with a name.
+   * Gives the parameters and types associated with the named method.
    * 
    * @param name a method reference as "class"."method" as in "A.m",
-   * @return the type map for associated parameter names
+   * @return the type list for associated parameter names
    */
-  public Map<String, String> getParameterTypeMap(String name);
+  public List<SimpleImmutableEntry<String, String>> getParameterTypeList(String name);
   
   /**
    * Pushes new scope for local varibales.
